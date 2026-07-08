@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { initDatabase } from '@/lib/db-init';
+import { isAllowedImageMime, prepareImageForStorage, resolveMimeType } from '@/lib/image-upload';
 
 let dbInitialized = false;
 
@@ -52,14 +53,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid file type. Allowed: JPEG, PNG, WebP, GIF, AVIF' },
-        { status: 400 }
-      );
-    }
-
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json(
         { success: false, error: 'File too large. Maximum 5MB' },
@@ -67,12 +60,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert to base64 data URL
     const bytes = await file.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString('base64');
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    const inputBuffer = Buffer.from(bytes);
+    const resolvedMimeType = resolveMimeType(file.type, file.name, inputBuffer);
 
-    // Upsert into database
+    if (!isAllowedImageMime(resolvedMimeType)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid file type. Allowed: JPEG, PNG, WebP, GIF, AVIF, HEIC' },
+        { status: 400 }
+      );
+    }
+
+    let storedBuffer: Buffer;
+    let storedMimeType: string;
+    try {
+      ({ buffer: storedBuffer, mimeType: storedMimeType } = await prepareImageForStorage(
+        inputBuffer,
+        resolvedMimeType
+      ));
+    } catch (error) {
+      console.error('[API] Image processing error:', error);
+      return NextResponse.json(
+        { success: false, error: 'Could not process image. Try JPEG or PNG instead.' },
+        { status: 400 }
+      );
+    }
+
+    const base64 = storedBuffer.toString('base64');
+    const dataUrl = `data:${storedMimeType};base64,${base64}`;
+
     await pool.query(
       `INSERT INTO site_images (image_key, original_name, mime_type, size_bytes, data, uploaded_at)
        VALUES ($1, $2, $3, $4, $5, NOW())
@@ -82,7 +98,7 @@ export async function POST(request: NextRequest) {
          size_bytes = EXCLUDED.size_bytes,
          data = EXCLUDED.data,
          uploaded_at = NOW()`,
-      [imageKey, file.name, file.type, file.size, dataUrl]
+      [imageKey, file.name, storedMimeType, storedBuffer.length, dataUrl]
     );
 
     return NextResponse.json({

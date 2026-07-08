@@ -42,6 +42,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<'general' | 'activities' | 'packages' | 'reviews' | 'location' | 'images'>('general');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [uploadStatus, setUploadStatus] = useState<Record<string, 'idle' | 'uploading' | 'success' | 'error'>>({});
+  const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
 
   // Check auth session
   useEffect(() => {
@@ -106,6 +107,7 @@ export default function AdminPage() {
 
   const handleImageUpload = async (imageKey: string, file: File) => {
     setUploadStatus(prev => ({ ...prev, [imageKey]: 'uploading' }));
+    setUploadErrors(prev => ({ ...prev, [imageKey]: '' }));
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -122,9 +124,14 @@ export default function AdminPage() {
         setTimeout(() => setUploadStatus(prev => ({ ...prev, [imageKey]: 'idle' })), 3000);
       } else {
         setUploadStatus(prev => ({ ...prev, [imageKey]: 'error' }));
+        setUploadErrors(prev => ({
+          ...prev,
+          [imageKey]: data.error || 'Upload failed. Check file type and size (max 5MB).'
+        }));
       }
     } catch {
       setUploadStatus(prev => ({ ...prev, [imageKey]: 'error' }));
+      setUploadErrors(prev => ({ ...prev, [imageKey]: 'Server connection error' }));
     }
   };
 
@@ -221,6 +228,7 @@ export default function AdminPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const existing = getUploadedImage(imageKey);
     const status = uploadStatus[imageKey] || 'idle';
+    const errorMessage = uploadErrors[imageKey];
 
     return (
       <div className="bg-forest-deep/40 border border-stone-grey/10 rounded-2xl p-4 space-y-3">
@@ -230,6 +238,9 @@ export default function AdminPage() {
           {status === 'success' && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
           {status === 'error' && <AlertTriangle className="h-4 w-4 text-red-400" />}
         </div>
+        {status === 'error' && errorMessage && (
+          <p className="text-[10px] text-red-300 leading-snug">{errorMessage}</p>
+        )}
 
         {existing ? (
           <div className="relative group">
@@ -261,14 +272,14 @@ export default function AdminPage() {
           >
             <ImageIcon className="h-6 w-6 text-stone-grey/40" />
             <span className="text-[10px] text-text-sage font-semibold">Click to Upload Image</span>
-            <span className="text-[9px] text-stone-grey/40">JPEG, PNG, WebP • Max 5MB</span>
+            <span className="text-[9px] text-stone-grey/40">JPEG, PNG, WebP, HEIC • Max 5MB</span>
           </button>
         )}
 
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.gif,.avif,.heic,.heif"
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
