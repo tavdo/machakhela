@@ -1,5 +1,3 @@
-import sharp from 'sharp';
-
 const EXTENSION_MIME: Record<string, string> = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
@@ -102,15 +100,37 @@ export function resolveMimeType(
   return detectMimeFromBuffer(buffer);
 }
 
+const MAX_IMAGE_WIDTH = 2400;
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
+export function getMaxUploadBytes(): number {
+  return MAX_UPLOAD_BYTES;
+}
+
 export async function prepareImageForStorage(
   buffer: Buffer,
   mimeType: string
 ): Promise<{ buffer: Buffer; mimeType: string }> {
-  if (BROWSER_SAFE_MIME_TYPES.has(mimeType)) {
+  if (mimeType === 'image/gif') {
     return { buffer, mimeType };
   }
 
-  const converted = await sharp(buffer).rotate().jpeg({ quality: 85 }).toBuffer();
+  const needsConversion = !BROWSER_SAFE_MIME_TYPES.has(mimeType);
+  const needsCompression = buffer.length > 1.5 * 1024 * 1024;
+
+  if (!needsConversion && !needsCompression) {
+    return { buffer, mimeType };
+  }
+
+  const { default: sharp } = await import('sharp');
+  let pipeline = sharp(buffer).rotate();
+  const metadata = await pipeline.metadata();
+
+  if ((metadata.width || 0) > MAX_IMAGE_WIDTH) {
+    pipeline = pipeline.resize({ width: MAX_IMAGE_WIDTH, withoutEnlargement: true });
+  }
+
+  const converted = await pipeline.jpeg({ quality: 85 }).toBuffer();
   return { buffer: converted, mimeType: 'image/jpeg' };
 }
 

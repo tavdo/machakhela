@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import pool, { hasDatabaseConfig } from '@/lib/db';
 import { initDatabase } from '@/lib/db-init';
-import { isAllowedImageMime, prepareImageForStorage, resolveMimeType } from '@/lib/image-upload';
+import { getUploadErrorMessage } from '@/lib/api-errors';
+import {
+  getMaxUploadBytes,
+  isAllowedImageMime,
+  prepareImageForStorage,
+  resolveMimeType,
+} from '@/lib/image-upload';
+
+export const runtime = 'nodejs';
+export const maxDuration = 30;
 
 let dbInitialized = false;
 
@@ -40,6 +49,16 @@ export async function GET() {
 // POST: Upload an image (stores as base64 in PostgreSQL)
 export async function POST(request: NextRequest) {
   try {
+    if (!hasDatabaseConfig()) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Database is not configured. Add DATABASE_URL to your environment variables.',
+        },
+        { status: 503 }
+      );
+    }
+
     await ensureDb();
 
     const formData = await request.formData();
@@ -53,9 +72,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    const maxUploadBytes = getMaxUploadBytes();
+    if (file.size > maxUploadBytes) {
       return NextResponse.json(
-        { success: false, error: 'File too large. Maximum 5MB' },
+        { success: false, error: `File too large. Maximum ${Math.floor(maxUploadBytes / (1024 * 1024))}MB` },
         { status: 400 }
       );
     }
@@ -112,7 +132,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[API] POST /api/admin/images error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to upload image' },
+      { success: false, error: getUploadErrorMessage(error) },
       { status: 500 }
     );
   }

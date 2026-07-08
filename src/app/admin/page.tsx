@@ -117,7 +117,21 @@ export default function AdminPage() {
         method: 'POST',
         body: formData
       });
-      const data = await res.json();
+
+      let data: { success?: boolean; error?: string };
+      try {
+        data = await res.json();
+      } catch {
+        setUploadStatus(prev => ({ ...prev, [imageKey]: 'error' }));
+        setUploadErrors(prev => ({
+          ...prev,
+          [imageKey]: res.status === 413
+            ? 'File too large for the server. Try a smaller image (max 4MB).'
+            : `Upload failed (HTTP ${res.status}). Check server configuration.`,
+        }));
+        return;
+      }
+
       if (data.success) {
         setUploadStatus(prev => ({ ...prev, [imageKey]: 'success' }));
         await refreshData();
@@ -126,7 +140,7 @@ export default function AdminPage() {
         setUploadStatus(prev => ({ ...prev, [imageKey]: 'error' }));
         setUploadErrors(prev => ({
           ...prev,
-          [imageKey]: data.error || 'Upload failed. Check file type and size (max 5MB).'
+          [imageKey]: data.error || 'Upload failed. Check file type and size (max 4MB).'
         }));
       }
     } catch {
@@ -272,7 +286,7 @@ export default function AdminPage() {
           >
             <ImageIcon className="h-6 w-6 text-stone-grey/40" />
             <span className="text-[10px] text-text-sage font-semibold">Click to Upload Image</span>
-            <span className="text-[9px] text-stone-grey/40">JPEG, PNG, WebP, HEIC • Max 5MB</span>
+            <span className="text-[9px] text-stone-grey/40">JPEG, PNG, WebP, HEIC • Max 4MB</span>
           </button>
         )}
 
