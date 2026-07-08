@@ -55,7 +55,7 @@ export const InteractiveMap: React.FC = () => {
         <div className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-safety-orange/5 blur-3xl pointer-events-none" />
         <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-harness-yellow/5 blur-3xl pointer-events-none" />
 
-        <div className="relative aspect-[800/400] w-full min-h-[300px] select-none">
+        <div className="relative aspect-[800/400] w-full select-none">
           <svg
             viewBox="0 0 800 400"
             className="w-full h-full"

@@ -51,7 +51,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-forest-deep text-text-offwhite relative selection:bg-safety-orange selection:text-white pb-24 md:pb-0">
+    <div className="min-h-screen bg-forest-deep text-text-offwhite relative selection:bg-safety-orange selection:text-white pb-24 md:pb-0 overflow-x-hidden">
       {/* Background ambient lighting */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-safety-orange/5 blur-3xl pointer-events-none" />
       <div className="absolute top-[1200px] right-1/4 w-[600px] h-[600px] rounded-full bg-harness-yellow/5 blur-3xl pointer-events-none" />
