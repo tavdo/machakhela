@@ -158,7 +158,7 @@ export const Header: React.FC = () => {
 
       {/* Mobile Menu Panel */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-forest-deep/98 backdrop-blur-2xl border-b border-stone-grey/15 w-full absolute top-20 left-0 py-6 px-4 animate-fade-in shadow-2xl">
+        <div className="lg:hidden bg-forest-deep border-b border-stone-grey/15 w-full absolute top-20 left-0 py-6 px-4 animate-fade-in shadow-2xl">
           {/* Mobile Language Switcher inside Menu */}
           <div className="flex justify-center mb-6">
             <div className="flex items-center bg-forest-deep/80 px-2 py-1.5 rounded-full border border-stone-grey/25 text-xs font-bold">
