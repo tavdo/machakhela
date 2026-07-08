@@ -51,7 +51,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-forest-deep text-text-offwhite relative selection:bg-safety-orange selection:text-white pb-16 md:pb-0">
+    <div className="min-h-screen bg-forest-deep text-text-offwhite relative selection:bg-safety-orange selection:text-white pb-24 md:pb-0">
       {/* Background ambient lighting */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-safety-orange/5 blur-3xl pointer-events-none" />
       <div className="absolute top-[1200px] right-1/4 w-[600px] h-[600px] rounded-full bg-harness-yellow/5 blur-3xl pointer-events-none" />
@@ -107,7 +107,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl sm:text-6xl md:text-7xl font-extrabold font-oswald text-text-offwhite tracking-tight leading-[1.1] mb-6 uppercase"
+            className="text-3xl sm:text-5xl lg:text-7xl font-extrabold font-oswald text-text-offwhite tracking-tight leading-[1.15] mb-6 uppercase break-words"
           >
             {t.heroTagline.split(' ').map((word, i) => (
               <span key={i} className={word.includes('ადრენალინი') || word.includes('Adrenaline') || word.includes('адреналин') ? 'text-safety-orange glow-text-orange' : ''}>
@@ -305,7 +305,7 @@ export default function Home() {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {t.packages.map((pkg, i) => {
             const isPopular = pkg.badge !== undefined;
             return (
@@ -313,7 +313,7 @@ export default function Home() {
                 key={i}
                 className={`relative rounded-3xl p-8 border transition-all duration-300 flex flex-col justify-between ${
                   isPopular
-                    ? 'bg-forest-surface border-safety-orange shadow-2xl scale-105 z-10'
+                    ? 'bg-forest-surface border-safety-orange shadow-2xl lg:scale-105 z-10'
                     : 'bg-forest-surface/40 border-stone-grey/15 shadow-xl hover:border-safety-orange/30'
                 }`}
               >

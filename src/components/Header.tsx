@@ -72,9 +72,9 @@ export const Header: React.FC = () => {
     <header className="sticky top-0 z-50 w-full glass-panel border-b border-stone-grey/15">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex items-center space-x-2 group">
-          <Compass className="h-8 w-8 text-safety-orange group-hover:rotate-45 transition-transform duration-500" />
-          <span className="text-2xl font-bold tracking-wider text-text-offwhite font-oswald">
+        <a href="#" className="flex items-center space-x-1.5 md:space-x-2 group">
+          <Compass className="h-6 w-6 md:h-8 md:w-8 text-safety-orange group-hover:rotate-45 transition-transform duration-500" />
+          <span className="text-lg md:text-2xl font-bold tracking-wider text-text-offwhite font-oswald whitespace-nowrap">
             {t.navTitle} <span className="text-safety-orange">HUB</span>
           </span>
         </a>
@@ -135,21 +135,6 @@ export const Header: React.FC = () => {
 
         {/* Mobile & Small Desktop Controls Panel */}
         <div className="flex lg:hidden items-center space-x-4">
-          {/* Language selector for mobile */}
-          <div className="flex items-center bg-forest-deep/60 px-2 py-1 rounded-full border border-stone-grey/20 text-[10px] font-bold">
-            {(['ka', 'en', 'ru', 'he', 'ar'] as Language[]).map((lang) => (
-              <button
-                key={lang}
-                onClick={() => toggleLanguage(lang)}
-                className={`px-1.5 py-0.5 rounded uppercase ${
-                  language === lang ? 'bg-safety-orange text-white' : 'text-text-sage'
-                }`}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-
           <a
             href="tel:593655556"
             className="p-2 bg-safety-orange rounded-full text-white shadow shadow-safety-orange/30 hover:scale-105 active:scale-95 transition-all"
@@ -174,6 +159,22 @@ export const Header: React.FC = () => {
       {/* Mobile Menu Panel */}
       {mobileMenuOpen && (
         <div className="lg:hidden glass-panel border-t border-stone-grey/15 w-full absolute top-20 left-0 py-6 px-4 animate-fade-in shadow-2xl">
+          {/* Mobile Language Switcher inside Menu */}
+          <div className="flex justify-center mb-6">
+            <div className="flex items-center bg-forest-deep/80 px-2 py-1.5 rounded-full border border-stone-grey/25 text-xs font-bold">
+              {(['ka', 'en', 'ru', 'he', 'ar'] as Language[]).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => toggleLanguage(lang)}
+                  className={`px-3 py-1 rounded-full transition-all uppercase ${
+                    language === lang ? 'bg-safety-orange text-white shadow-md' : 'text-text-sage hover:text-text-offwhite'
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+          </div>
           <nav className="flex flex-col space-y-4 font-oswald text-lg tracking-wider text-center">
             {navItems.map((item) => (
               <a
